@@ -10,10 +10,15 @@ domain_name="<your-domain>" # ex. "*.my-domain.com"
 
 # fetch current public IP
 my_ip=$(curl -s ifconfig.me)
-# echo "my_ip: "$my_ip # debug
 # fetch public IP registered with Cloudflare
 cf_ip=$(curl -s --request GET --url https://api.cloudflare.com/client/v4/zones/${zone_identifier}/dns_records/${identifier} -H "Authorization: Bearer "${api_token} -H "Content-Type:application/json" | jq .result.content | tr -d '"')
-# echo "cf_ip: "$cf_ip # debug
+
+# Check to see if DNS is working, this can be omited if DNS is not in a container on your server
+if [[ $my_ip == "" || $cf_ip == "" ]]
+then
+    echo "IP is empty, restarting DNS container!"
+    docker restart $dns_container
+fi
 
 if [[ $my_ip == $cf_ip ]] 
 then
@@ -21,7 +26,7 @@ then
 else
     echo "Updating IP within Cloudflare from: $cf_ip, to: $my_ip"
     # Update and register result of update
-    result=$(curl -s --request PUT --url https://api.cloudflare.com/client/v4/zones/${zone_identifier}/dns_records/${identifier} -H "Content-Type: application/json" -H "Authorization: Bearer ${api_token}" -d '{"content": "'${my_ip}'", "name": "'${domain_name}'", "proxied": true, "type": "A", "tags": [], "ttl": 1}' | jq .success)
+    result=$(curl -s --request PUT --url https://api.cloudflare.com/client/v4/zones/${zone_identifier}/dns_records/${identifier} -H "Content-Type: application/json" -H "Authorization: Bearer ${api_token}" -d '{"content": "'${my_ip}'", "name": "'${domain_name}'", "proxied": false, "type": "A", "tags": [], "ttl": 1}' | jq .success)
     # echo "result: "$result # debug
     if [[ $result == true ]]
     then
