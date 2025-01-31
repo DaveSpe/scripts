@@ -3,4 +3,4 @@
 ## Cloudflare DDNS
 
 Your api token needs the following permissions...
-![Screenshot From 2025-01-31 15-48-35](https://github.com/user-attachments/assets/bc959e65-4eae-4787-a7db-bf2137217bec)
+![image](https://github.com/user-attachments/assets/da172194-9bb4-43f5-b005-b0c202b36e7f)
